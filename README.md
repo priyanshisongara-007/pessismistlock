@@ -1,0 +1,82 @@
+# Pessimistic Locking Demo in Java
+
+This project demonstrates different approaches to handle concurrent booking using **pessimistic locking** techniques in a Java application with MySQL as the database.
+
+---
+
+## Overview
+
+The application simulates concurrent users trying to book seats and showcases three primary approaches for handling database row locking:
+
+1. **Pessimistic Locking with `FOR UPDATE`**  
+   Locks the selected rows until the transaction completes, blocking other transactions from accessing these rows.
+
+2. **Pessimistic Locking with `FOR UPDATE SKIP LOCKED` (MySQL 8+)**  
+   Allows skipping rows currently locked by other transactions, reducing waiting time under concurrency.
+
+3. **No Locking (Optimistic / Simple Selection)**  
+   Selects data without any lock, which may lead to race conditions like double booking in concurrent environments.
+
+---
+
+## Prerequisites
+
+- Java 8 or higher
+- MySQL 8.0+ (required for `FOR UPDATE SKIP LOCKED`, but `FOR UPDATE` and no-lock approaches work on earlier versions)
+- MySQL JDBC Driver ([mysql-connector-java](https://dev.mysql.com/downloads/connector/j/))
+- A MySQL database with a table `seats` structured as:
+
+    ```sql
+    CREATE TABLE seats (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      is_booked TINYINT(1) DEFAULT 0
+    ) ENGINE=InnoDB;
+    ```
+
+- At least **120 unbooked** seat records (`is_booked = 0`) for testing
+
+---
+
+## Project Structure
+
+- **`BookingService.java`** — Contains methods implementing booking logic using different locking strategies.
+- **`BookingTest.java`** — Simulates concurrent booking requests for multiple users using thread pools.
+- **`DBManager`** (not shown) — Database connection utility to provide JDBC connections.
+
+---
+
+## Usage and Scenarios
+
+### 1. Booking with `FOR UPDATE`
+
+- **Method:** `bookSeatForUpdate(int userId)`
+- **Behavior:**  
+  Begins a transaction and executes a `SELECT ... FOR UPDATE` query to lock one available seat row.  
+  The row remains locked until transaction commit or rollback, preventing concurrent access.  
+- **Pros:** Ensures strict concurrency control, prevents double bookings.  
+- **Cons:** Can cause blocking and reduce throughput under heavy contention.
+
+### 2. Booking with `FOR UPDATE SKIP LOCKED`
+
+- **Method:** `bookSeatForUpdateSkipLocked(int userId)`
+- **Behavior:**  
+  Like `FOR UPDATE` but skips locked rows to select the next available seat, reducing wait times.  
+- **Pros:** Improves concurrency, reduces deadlocks.  
+- **Cons:** Requires MySQL 8.0+; not supported on older versions.
+
+### 3. Booking without any Locking (`NO LOCK`)
+
+- **Method:** `bookSeatNoLock(int userId)`
+- **Behavior:**  
+  Selects available seats without any row locking.  
+- **Pros:** No blocking, higher throughput when concurrency is low.  
+- **Cons:** Risks race conditions and double bookings under concurrency.
+
+---
+
+## Running the Tests
+
+The `BookingTest` class simulates concurrent booking requests for 120 users, with configurable locking types:
+
+```java
+enum BookingType { FOR_UPDATE, SKIP_LOCKED, NO_LOCK }
