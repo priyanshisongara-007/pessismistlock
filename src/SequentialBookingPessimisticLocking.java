@@ -5,7 +5,7 @@ public class SequentialBookingPessimisticLocking {
 
     private static final String JDBC_URL = "jdbc:mysql://10.65.134.76:3306/airline_booking?useSSL=false&serverTimezone=UTC";
     private static final String JDBC_USER = "root";
-    private static final String JDBC_PASS = "root";
+    private static final String JDBC_PASS = "****";
 
     public static void main(String[] args) {
         SequentialBookingPessimisticLocking booking = new SequentialBookingPessimisticLocking();
