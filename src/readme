@@ -1,0 +1,3 @@
+Use MYSQL version more than 8.0.0 to have SKIP LOCKED feature enabled.
+use SELECT VERSION(); to know the mysql version
+the databases are preapred in icsdev_saas_db_1
