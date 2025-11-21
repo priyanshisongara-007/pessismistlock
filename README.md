@@ -80,3 +80,22 @@ The `BookingTest` class simulates concurrent booking requests for 120 users, wit
 
 ```java
 enum BookingType { FOR_UPDATE, SKIP_LOCKED, NO_LOCK }
+
+## Sample SQLS:
+CREATE DATABASE airline_booking;
+USE airline_booking;
+
+CREATE TABLE seats (
+    id INT PRIMARY KEY,
+    is_booked BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+-- Initialize seats 1 to 120
+INSERT INTO seats (id, is_booked)
+SELECT seq, FALSE FROM (
+    SELECT 1 seq UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL
+    -- make this a range up to 120 programmatically, or insert manually for demo
+    SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10
+) AS dummy;
+-- For full 120, you’d script insertion or use stored procedure.
+
